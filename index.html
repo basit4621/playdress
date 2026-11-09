@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLAY DRESS UP – Modest Fashion & Digital Styling Prototype</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .font-serif {
+      font-family: 'Playfair Display', serif;
+    }
+    
+    /* Smooth view transitions */
+    .view-section {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+    .view-section.active {
+      display: block;
+      opacity: 1;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.03);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-stone-50 text-stone-800 antialiased min-h-screen flex flex-col selection:bg-rose-100 selection:text-rose-900">
+
+  <!-- TOP HEADER & NAVIGATION -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-rose-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Tagline -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('view-home')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white shadow-md shadow-rose-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+          </svg>
+        </div>
+        <div>
+          <span class="text-xl font-bold font-serif tracking-tight text-stone-900">PLAY DRESS UP</span>
+          <span class="block text-[10px] font-bold tracking-widest text-rose-600 uppercase -mt-0.5">Modest Style & Digital Twin</span>
+        </div>
+      </div>
+
+      <!-- Main Navigation Menu -->
+      <nav class="hidden md:flex items-center space-x-1 text-sm font-semibold text-stone-600">
+        <button onclick="navigateTo('view-home')" class="nav-btn px-3 py-1.5 rounded-lg hover:text-rose-600 hover:bg-rose-50 transition" data-target="view-home">Home</button>
+        <button onclick="navigateTo('view-avatar')" class="nav-btn px-3 py-1.5 rounded-lg hover:text-rose-600 hover:bg-rose-50 transition" data-target="view-avatar">My Avatar</button>
+        <button onclick="navigateTo('view-studio')" class="nav-btn px-3 py-1.5 rounded-lg hover:text-rose-600 hover:bg-rose-50 transition" data-target="view-studio">Dressing Studio</button>
+        <button onclick="navigateTo('view-store')" class="nav-btn px-3 py-1.5 rounded-lg hover:text-rose-600 hover:bg-rose-50 transition" data-target="view-store">Modest Catalog</button>
+        <button onclick="navigateTo('view-challenges')" class="nav-btn px-3 py-1.5 rounded-lg hover:text-rose-600 hover:bg-rose-50 transition" data-target="view-challenges">Daily Challenges</button>
+        <button onclick="navigateTo('view-profile')" class="nav-btn px-3 py-1.5 rounded-lg hover:text-rose-600 hover:bg-rose-50 transition" data-target="view-profile">My Saved Outfits (<span id="nav-saved-count">0</span>)</button>
+      </nav>
+
+      <!-- Right Controls: Coins & Cart -->
+      <div class="flex items-center space-x-3">
+        <!-- Coins Balance -->
+        <div class="flex items-center space-x-1.5 bg-amber-50 border border-amber-200/80 px-3 py-1 rounded-full text-amber-900 text-xs sm:text-sm font-bold shadow-sm" title="Your reward coins for styling">
+          <span>🪙</span>
+          <span id="user-coins">450</span>
+          <span class="text-[11px] text-amber-700 font-medium hidden sm:inline">Coins</span>
+        </div>
+
+        <!-- Slide-out Cart Button -->
+        <button onclick="toggleCartDrawer(true)" class="relative p-2 rounded-xl bg-stone-100 hover:bg-rose-50 text-stone-700 hover:text-rose-600 transition border border-stone-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+          <span id="cart-badge-count" class="absolute -top-1.5 -right-1.5 bg-rose-600 text-white font-extrabold text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
+        </button>
+
+        <!-- User Profile Pill -->
+        <div onclick="navigateTo('view-profile')" class="cursor-pointer hidden lg:flex items-center space-x-2 border-l border-stone-200 pl-3">
+          <div class="w-8 h-8 rounded-full bg-rose-100 border border-rose-300 flex items-center justify-center text-rose-700 font-bold text-xs" id="nav-user-initial">
+            O
+          </div>
+          <span class="text-xs font-bold text-stone-700" id="nav-user-name">Oreoluwa</span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- NOTIFICATION TOAST -->
+  <div id="app-toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-stone-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-semibold border border-stone-700">
+    <span id="toast-icon">✨</span>
+    <span id="toast-msg">Notification message</span>
+  </div>
+
+  <!-- MAIN APPLICATION BODY -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- ==================================================== -->
+    <!-- VIEW 1: HOME & LANDING PAGE                          -->
+    <!-- ==================================================== -->
+    <section id="view-home" class="view-section active space-y-10">
+      
+      <!-- Hero Banner -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-rose-600 via-pink-600 to-amber-500 text-white p-8 sm:p-12 shadow-xl shadow-rose-200">
+        <div class="relative z-10 max-w-2xl">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold uppercase tracking-wider mb-4">
+            🌟 Play Dress Up Prototype v1.0
+          </span>
+          <h1 class="text-4xl sm:text-5xl font-extrabold font-serif leading-tight">
+            Modest Fashion Meets <br><span class="text-amber-200">Digital Dressing.</span>
+          </h1>
+          <p class="mt-4 text-base sm:text-lg text-rose-100 leading-relaxed">
+            Create an avatar that matches your real body shape and skin tone. Style elegant, modest outfits, save your favorite looks, and experience shopping designed specifically for women who value dignity, beauty, and grace.
+          </p>
+
+          <div class="mt-8 flex flex-wrap gap-4">
+            <button onclick="navigateTo('view-avatar')" class="px-6 py-3.5 rounded-xl bg-white text-rose-700 font-bold text-sm shadow-md hover:bg-rose-50 transition flex items-center gap-2">
+              <span>Step 1: Customize Your Avatar</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </button>
+            <button onclick="navigateTo('view-studio')" class="px-6 py-3.5 rounded-xl bg-stone-900/40 backdrop-blur-md hover:bg-stone-900/60 text-white font-bold text-sm transition">
+              Open Dressing Studio
+            </button>
+          </div>
+        </div>
+
+        <!-- Background Decorative Circles -->
+        <div class="absolute -right-10 -bottom-10 w-96 h-96 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
+      </div>
+
+      <!-- Quick Category Shortcuts -->
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-2xl font-bold font-serif text-stone-900">Explore Modest Collections</h2>
+            <p class="text-xs text-stone-500">Curated specifically for full coverage, class, and high style</p>
+          </div>
+          <button onclick="navigateTo('view-store')" class="text-xs font-bold text-rose-600 hover:underline">
+            View All 20+ Pieces →
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div onclick="filterStoreCategory('sunday')" class="cursor-pointer group p-5 bg-white rounded-2xl border border-stone-200 hover:border-rose-300 shadow-sm hover:shadow-md transition text-center">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-purple-50 text-3xl flex items-center justify-center group-hover:scale-110 transition">🌸</div>
+            <h3 class="font-bold text-stone-900 text-sm mt-3">Sunday Best</h3>
+            <p class="text-[11px] text-stone-500 mt-0.5">Flowing midi & maxi dresses</p>
+          </div>
+
+          <div onclick="filterStoreCategory('corporate')" class="cursor-pointer group p-5 bg-white rounded-2xl border border-stone-200 hover:border-rose-300 shadow-sm hover:shadow-md transition text-center">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-blue-50 text-3xl flex items-center justify-center group-hover:scale-110 transition">💼</div>
+            <h3 class="font-bold text-stone-900 text-sm mt-3">Corporate Chic</h3>
+            <p class="text-[11px] text-stone-500 mt-0.5">Tailored blazers & trousers</p>
+          </div>
+
+          <div onclick="filterStoreCategory('casual')" class="cursor-pointer group p-5 bg-white rounded-2xl border border-stone-200 hover:border-rose-300 shadow-sm hover:shadow-md transition text-center">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-50 text-3xl flex items-center justify-center group-hover:scale-110 transition">☕</div>
+            <h3 class="font-bold text-stone-900 text-sm mt-3">Casual Chic</h3>
+            <p class="text-[11px] text-stone-500 mt-0.5">Pleated skirts & knitwear</p>
+          </div>
+
+          <div onclick="filterStoreCategory('special')" class="cursor-pointer group p-5 bg-white rounded-2xl border border-stone-200 hover:border-rose-300 shadow-sm hover:shadow-md transition text-center">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 text-3xl flex items-center justify-center group-hover:scale-110 transition">✨</div>
+            <h3 class="font-bold text-stone-900 text-sm mt-3">OWAMBE & Events</h3>
+            <p class="text-[11px] text-stone-500 mt-0.5">Silk gowns & royal wraps</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================================================== -->
+    <!-- VIEW 2: AVATAR CUSTOMIZER (STEP 1 OF PROTOTYPE)       -->
+    <!-- ==================================================== -->
+    <section id="view-avatar" class="view-section space-y-6">
+      
+      <!-- Top Title -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-200 gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-rose-600">Avatar Engine</span>
+          <h1 class="text-3xl font-extrabold font-serif text-stone-900">Customize Your Digital Twin</h1>
+          <p class="text-xs text-stone-500">Pick your body shape, skin complexion, and hair. Changes update in real time.</p>
+        </div>
+        <button onclick="saveAvatarProfile()" class="px-6 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs shadow transition flex items-center gap-2">
+          <span>Save & Go To Dressing Studio</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- LEFT: Live Avatar Canvas -->
+        <div class="lg:col-span-5 bg-gradient-to-b from-rose-50/50 via-white to-amber-50/20 p-6 rounded-3xl border border-rose-100 flex flex-col items-center justify-center relative shadow-sm min-h-[480px]">
+          <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-stone-600 border border-stone-200">
+            Real-Time SVG Renderer
+          </div>
+
+          <!-- THE DYNAMIC SVG AVATAR -->
+          <div class="relative w-64 h-96 flex items-center justify-center">
+            <svg id="main-avatar-svg" viewBox="0 0 200 340" class="w-full h-full drop-shadow-xl transition-all duration-300">
+              <!-- Shadow base -->
+              <ellipse cx="100" cy="330" rx="45" ry="8" fill="#e2e8f0"></ellipse>
+
+              <!-- Shoes -->
+              <path d="M78 322 C78 322 84 326 92 326 C94 326 95 323 93 320 L86 310 Z" fill="#b91c1c" class="avatar-shoe"></path>
+              <path d="M122 322 C122 322 116 326 108 326 C106 326 105 323 107 320 L114 310 Z" fill="#b91c1c" class="avatar-shoe"></path>
+
+              <!-- Legs -->
+              <rect class="avatar-skin" x="85" y="220" width="11" height="95" rx="5" fill="#8D5524"></rect>
+              <rect class="avatar-skin" x="104" y="220" width="11" height="95" rx="5" fill="#8D5524"></rect>
+
+              <!-- Torso / Body Path (Morphs with shape) -->
+              <path id="svg-torso" class="avatar-skin" d="M78 120 C75 140 76 170 82 195 C84 205 88 225 100 225 C112 225 116 205 118 195 C124 170 125 140 122 120 Z" fill="#8D5524"></path>
+
+              <!-- Garment Layer (Dresses, Tops, Skirts) -->
+              <g id="svg-garment-group">
+                <!-- Base Dress -->
+                <path id="svg-dress-main" d="M77 122 C75 145 74 180 66 250 C90 256 110 256 134 250 C126 180 125 145 123 122 Z" fill="#c084fc"></path>
+                <path id="svg-dress-neck" d="M80 120 Q100 132 120 120 Z" fill="#9333ea"></path>
+              </g>
+
+              <!-- Neck -->
+              <rect class="avatar-skin" x="95" y="98" width="10" height="25" rx="3" fill="#8D5524"></rect>
+
+              <!-- Head / Face -->
+              <ellipse class="avatar-skin" cx="100" cy="80" rx="19" ry="24" fill="#8D5524"></ellipse>
+
+              <!-- Facial Details -->
+              <circle cx="93" cy="78" r="2" fill="#2d1b0d"></circle>
+              <circle cx="107" cy="78" r="2" fill="#2d1b0d"></circle>
+              <path d="M96 89 Q100 93 104 89" stroke="#991b1b" stroke-width="1.5" fill="none" stroke-linecap="round"></path>
+
+              <!-- Hairstyle -->
+              <g id="svg-hair-group">
+                <path id="svg-hair-path" d="M78 78 C76 48 124 48 122 78 C126 95 125 130 122 145 C118 145 115 130 115 110 C108 110 102 110 95 110 C85 110 82 130 78 145 C75 130 74 95 78 78 Z" fill="#1c1917"></path>
+              </g>
+
+              <!-- Arms -->
+              <path class="avatar-skin" d="M78 122 C72 150 70 175 68 200 C67 206 72 208 74 204 C77 185 81 155 83 130 Z" fill="#8D5524"></path>
+              <path class="avatar-skin" d="M122 122 C128 150 130 175 132 200 C133 206 128 208 126 204 C123 185 119 155 117 130 Z" fill="#8D5524"></path>
+
+              <!-- Outerwear / Blazer Overlay -->
+              <g id="svg-outerwear-group" style="display: none;">
+                <path d="M73 120 L64 185 L84 195 L90 135 Z" fill="#1e293b"></path>
+                <path d="M127 120 L136 185 L116 195 L110 135 Z" fill="#1e293b"></path>
+              </g>
+
+              <!-- Handbag Accessory -->
+              <g id="svg-accessory-bag" style="display: none;">
+                <rect x="58" y="195" width="18" height="15" rx="3" fill="#b45309"></rect>
+                <path d="M63 195 C63 188 71 188 71 195" stroke="#78350f" stroke-width="2" fill="none"></path>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Summary Tag -->
+          <div class="mt-4 bg-white px-4 py-1.5 rounded-full border border-stone-200 text-xs font-semibold text-stone-700 shadow-sm" id="avatar-desc-pill">
+            Rich Cocoa • Hourglass • Knotless Braids
+          </div>
+        </div>
+
+        <!-- RIGHT: Controls -->
+        <div class="lg:col-span-7 space-y-6">
+          
+          <!-- 1. Body Silhouette -->
+          <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+            <h3 class="text-xs font-bold text-stone-800 uppercase tracking-wider mb-3">1. Select Body Silhouette</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5" id="controls-body-shapes">
+              <button onclick="setBodyShape('hourglass')" class="body-btn active p-3 rounded-xl border-2 border-rose-500 bg-rose-50 text-center text-xs font-bold text-rose-900 transition flex flex-col items-center gap-1" data-val="hourglass">
+                <span class="text-lg">⏳</span>
+                <span>Hourglass</span>
+              </button>
+              <button onclick="setBodyShape('curvy')" class="body-btn p-3 rounded-xl border border-stone-200 hover:border-rose-300 text-center text-xs font-bold text-stone-700 transition flex flex-col items-center gap-1" data-val="curvy">
+                <span class="text-lg">🍐</span>
+                <span>Curvy / Pear</span>
+              </button>
+              <button onclick="setBodyShape('slim')" class="body-btn p-3 rounded-xl border border-stone-200 hover:border-rose-300 text-center text-xs font-bold text-stone-700 transition flex flex-col items-center gap-1" data-val="slim">
+                <span class="text-lg">🧍🏽‍♀️</span>
+                <span>Slim / Petite</span>
+              </button>
+              <button onclick="setBodyShape('plus')" class="body-btn p-3 rounded-xl border border-stone-200 hover:border-rose-300 text-center text-xs font-bold text-stone-700 transition flex flex-col items-center gap-1" data-val="plus">
+                <span class="text-lg">🌸</span>
+                <span>Plus-Size</span>
+              </button>
+              <button onclick="setBodyShape('athletic')" class="body-btn p-3 rounded-xl border border-stone-200 hover:border-rose-300 text-center text-xs font-bold text-stone-700 transition flex flex-col items-center gap-1" data-val="athletic">
+                <span class="text-lg">💪🏽</span>
+                <span>Athletic</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Skin Complexion -->
+          <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+            <h3 class="text-xs font-bold text-stone-800 uppercase tracking-wider mb-3">2. Skin Tone Palette</h3>
+            <div class="flex items-center gap-3 overflow-x-auto pb-1">
+              <button onclick="setSkinColor('#5C3818', 'Deep Bronze')" class="skin-btn w-10 h-10 rounded-full border-2 border-white ring-2 ring-stone-200 hover:scale-110 transition shadow-sm" style="background-color: #5C3818;" title="Deep Bronze"></button>
+              <button onclick="setSkinColor('#8D5524', 'Rich Cocoa')" class="skin-btn active w-10 h-10 rounded-full border-2 border-white ring-2 ring-rose-500 scale-110 transition shadow-sm" style="background-color: #8D5524;" title="Rich Cocoa"></button>
+              <button onclick="setSkinColor('#C68642', 'Caramel Glow')" class="skin-btn w-10 h-10 rounded-full border-2 border-white ring-2 ring-stone-200 hover:scale-110 transition shadow-sm" style="background-color: #C68642;" title="Caramel Glow"></button>
+              <button onclick="setSkinColor('#E0AC69', 'Warm Sand')" class="skin-btn w-10 h-10 rounded-full border-2 border-white ring-2 ring-stone-200 hover:scale-110 transition shadow-sm" style="background-color: #E0AC69;" title="Warm Sand"></button>
+              <button onclick="setSkinColor('#F7D0B7', 'Almond Ivory')" class="skin-btn w-10 h-10 rounded-full border-2 border-white ring-2 ring-stone-200 hover:scale-110 transition shadow-sm" style="background-color: #F7D0B7;" title="Almond Ivory"></button>
+            </div>
+          </div>
+
+          <!-- 3. Hairstyle & Modest Headwear -->
+          <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+            <h3 class="text-xs font-bold text-stone-800 uppercase tracking-wider mb-3">3. Hairstyle & Headwear</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <button onclick="setHairstyle('braids')" class="hair-btn active p-3 rounded-xl border-2 border-rose-500 bg-rose-50 text-left text-xs font-semibold text-rose-900 transition" data-val="braids">
+                👑 Knotless Braids
+              </button>
+              <button onclick="setHairstyle('afro')" class="hair-btn p-3 rounded-xl border border-stone-200 hover:border-rose-300 text-left text-xs font-semibold text-stone-700 transition" data-val="afro">
+                ✨ Afro Puff
+              </button>
+              <button onclick="setHairstyle('bob')" class="hair-btn p-3 rounded-xl border border-stone-200 hover:border-rose-300 text-left text-xs font-semibold text-stone-700 transition" data-val="bob">
+                💇🏽‍♀️ Sleek Bob
+              </button>
+              <button onclick="setHairstyle('hijab')" class="hair-btn p-3 rounded-xl border border-stone-200 hover:border-rose-300 text-left text-xs font-semibold text-stone-700 transition" data-val="hijab">
+                🧕 Silk Hijab / Wrap
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================================================== -->
+    <!-- VIEW 3: DRESSING STUDIO (THE DRESS-UP ENGINE)        -->
+    <!-- ==================================================== -->
+    <section id="view-studio" class="view-section space-y-6">
+      
+      <!-- Studio Header -->
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600">Virtual Styling Canvas</span>
+          <h2 class="text-xl font-bold font-serif text-stone-900">Style Your Look & Save to Wardrobe</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- Save Look Button -->
+          <button onclick="openSaveOutfitPrompt()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5">
+            <span>💾 Save Look to Wardrobe</span>
+          </button>
+          <!-- Enter Challenge Button -->
+          <button onclick="submitStudioLookToChallenge()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-200 transition flex items-center gap-1.5">
+            <span>🏆 Submit to Challenge</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Avatar Display inside Studio -->
+        <div class="lg:col-span-5 bg-gradient-to-b from-rose-50/50 to-white p-6 rounded-3xl border border-rose-100 flex flex-col items-center justify-center relative shadow-sm min-h-[480px]">
+          <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-stone-600 border border-stone-200">
+            Dressing Room Canvas
+          </div>
+
+          <!-- Clone of the Avatar SVG for Studio -->
+          <div class="relative w-64 h-96 flex items-center justify-center" id="studio-avatar-clone-target">
+            <!-- JavaScript dynamically mirrors the live avatar here -->
+          </div>
+
+          <!-- Currently Equipped Items Details -->
+          <div class="mt-4 w-full bg-white p-3.5 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-stone-900" id="studio-item-name">Lilac Grace Floral Midi Gown</p>
+              <p class="text-[11px] text-stone-500" id="studio-item-price">₦24,500 • High Neck & Below Knee</p>
+            </div>
+            <button onclick="quickAddCurrentToCart()" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition">
+              + Add to Cart
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Wardrobe Category Racks -->
+        <div class="lg:col-span-7 space-y-4">
+          
+          <!-- Wardrobe Filter Tabs -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-1 border-b border-stone-200">
+            <button onclick="switchStudioRack('dresses')" class="studio-tab active px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-sm" data-rack="dresses">
+              Modest Dresses (4)
+            </button>
+            <button onclick="switchStudioRack('outerwear')" class="studio-tab px-4 py-2 rounded-xl text-xs font-bold bg-white text-stone-600 hover:bg-stone-100 border border-stone-200" data-rack="outerwear">
+              Blazers & Layers (2)
+            </button>
+            <button onclick="switchStudioRack('shoes-accessories')" class="studio-tab px-4 py-2 rounded-xl text-xs font-bold bg-white text-stone-600 hover:bg-stone-100 border border-stone-200" data-rack="shoes-accessories">
+              Accessories & Shoes (3)
+            </button>
+          </div>
+
+          <!-- Garments Grid in Studio -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5" id="studio-rack-grid">
+            <!-- Populated dynamically via JS -->
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================================================== -->
+    <!-- VIEW 4: MODEST CATALOG & PRODUCT STORE              -->
+    <!-- ==================================================== -->
+    <section id="view-store" class="view-section space-y-6">
+      
+      <!-- Store Header with Category Pills -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-200 gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-rose-600">Curated Boutique Catalog</span>
+          <h1 class="text-3xl font-extrabold font-serif text-stone-900">Modest Fashion Collection</h1>
+          <p class="text-xs text-stone-500">Every garment features modesty ratings (neckline, sleeve, hemline length).</p>
+        </div>
+
+        <!-- Category Filters -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1">
+          <button onclick="filterStoreCategory('all')" class="store-filter-btn active px-3.5 py-1.5 rounded-full text-xs font-bold bg-stone-900 text-white" data-filter="all">All</button>
+          <button onclick="filterStoreCategory('sunday')" class="store-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-stone-100 text-stone-600 hover:bg-stone-200" data-filter="sunday">Sunday Best</button>
+          <button onclick="filterStoreCategory('corporate')" class="store-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-stone-100 text-stone-600 hover:bg-stone-200" data-filter="corporate">Corporate</button>
+          <button onclick="filterStoreCategory('casual')" class="store-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-stone-100 text-stone-600 hover:bg-stone-200" data-filter="casual">Casual</button>
+          <button onclick="filterStoreCategory('special')" class="store-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold bg-stone-100 text-stone-600 hover:bg-stone-200" data-filter="special">OWAMBE</button>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="store-products-grid">
+        <!-- Rendered via JavaScript -->
+      </div>
+
+    </section>
+
+    <!-- ==================================================== -->
+    <!-- VIEW 5: DAILY CHALLENGES & GAMIFICATION             -->
+    <!-- ==================================================== -->
+    <section id="view-challenges" class="view-section space-y-8">
+      
+      <!-- Challenge Banner -->
+      <div class="bg-gradient-to-r from-amber-500 via-rose-500 to-pink-600 rounded-3xl p-6 sm:p-8 text-white shadow-lg">
+        <div class="max-w-2xl">
+          <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+            🏆 Daily Gamified Arena
+          </span>
+          <h2 class="text-3xl font-extrabold font-serif">Style Challenges & Coin Rewards</h2>
+          <p class="mt-2 text-rose-100 text-sm leading-relaxed">
+            Test your styling eye! Compete in themed challenges judged on <strong>Modesty, Theme Accuracy, and Creativity</strong>. Earn coins you can spend for discounts in the shop.
+          </p>
+        </div>
+      </div>
+
+      <!-- Challenges List -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Challenge 1 -->
+        <div class="bg-white rounded-3xl border border-rose-200 p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 text-[11px] font-bold uppercase">Active Today</span>
+              <span class="text-xs font-bold text-amber-600">🪙 +100 Coins</span>
+            </div>
+            <h3 class="text-lg font-bold text-stone-900">Sunday Best: Pastel Grace</h3>
+            <p class="text-xs text-stone-500 mt-1 leading-relaxed">
+              Style an elegant church look. Requirements: Below-knee or maxi hemline, covered shoulders, and soft pastel shades.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between">
+            <span class="text-xs text-stone-400">Ends in 6h 30m</span>
+            <button onclick="startChallengeFromArena('Sunday Best: Pastel Grace', 'lilac')" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition">
+              Style for Challenge
+            </button>
+          </div>
+        </div>
+
+        <!-- Challenge 2 -->
+        <div class="bg-white rounded-3xl border border-stone-200 p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-[11px] font-bold uppercase">Corporate</span>
+              <span class="text-xs font-bold text-amber-600">🪙 +80 Coins</span>
+            </div>
+            <h3 class="text-lg font-bold text-stone-900">Monday Executive Chic</h3>
+            <p class="text-xs text-stone-500 mt-1 leading-relaxed">
+              Command respect with dignified boardroom fashion. Layer blazers with high-neck blouses and clean trousers.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between">
+            <span class="text-xs text-stone-400">Ends in 18h</span>
+            <button onclick="startChallengeFromArena('Monday Executive Chic', 'navy')" class="px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs transition">
+              Style for Challenge
+            </button>
+          </div>
+        </div>
+
+        <!-- Challenge 3 -->
+        <div class="bg-white rounded-3xl border border-stone-200 p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold uppercase">Celebration</span>
+              <span class="text-xs font-bold text-amber-600">🪙 +150 Coins</span>
+            </div>
+            <h3 class="text-lg font-bold text-stone-900">OWAMBE Royal Guest</h3>
+            <p class="text-xs text-stone-500 mt-1 leading-relaxed">
+              Glamorous traditional wedding look. Flowing silk or lace maxi gown paired with a crown gele or wrap.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between">
+            <span class="text-xs text-stone-400">Starts Tomorrow</span>
+            <button onclick="startChallengeFromArena('OWAMBE Royal Guest', 'emerald')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition">
+              Preview Look
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================================================== -->
+    <!-- VIEW 6: USER PROFILE & SAVED OUTFITS                -->
+    <!-- ==================================================== -->
+    <section id="view-profile" class="view-section space-y-6">
+      
+      <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center space-x-4">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-400 text-white flex items-center justify-center font-bold text-2xl font-serif shadow-md shadow-rose-200">
+            O
+          </div>
+          <div>
+            <h2 class="text-2xl font-bold font-serif text-stone-900">Oreoluwa's Style Profile</h2>
+            <p class="text-xs text-stone-500">Stylist Rank: <span class="font-bold text-rose-600">Level 1: Chic Stylist</span> • 🪙 <span class="profile-coin-display">450</span> Coins</p>
+          </div>
+        </div>
+        <button onclick="navigateTo('view-avatar')" class="px-4 py-2 rounded-xl border border-stone-200 hover:bg-stone-50 text-xs font-bold text-stone-700 transition">
+          Edit Avatar Dimensions
+        </button>
+      </div>
+
+      <!-- Saved Outfits Section -->
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-xl font-bold font-serif text-stone-900">My Saved Wardrobe Creations</h3>
+            <p class="text-xs text-stone-500">Your personalized outfit combinations saved from the Dressing Studio</p>
+          </div>
+          <button onclick="navigateTo('view-studio')" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition">
+            + Style a New Outfit
+          </button>
+        </div>
+
+        <!-- Saved Outfits Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="saved-outfits-grid">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================================================== -->
+  <!-- MODAL: PRODUCT DETAILS & ADD-TO-CART (STEP 4)        -->
+  <!-- ==================================================== -->
+  <div id="modal-product-details" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-2xl border border-stone-100 text-left relative">
+      <button onclick="closeProductModal()" class="absolute top-6 right-6 w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-500 font-bold">✕</button>
+
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-20 h-20 rounded-2xl bg-rose-50 flex items-center justify-center text-4xl" id="modal-p-icon">🌸</div>
+        <div>
+          <span class="text-[10px] font-bold text-rose-600 uppercase tracking-wider" id="modal-p-category">Sunday Best</span>
+          <h3 class="text-xl font-bold font-serif text-stone-900" id="modal-p-title">Lilac Grace Floral Midi</h3>
+          <p class="text-lg font-extrabold text-stone-900 mt-0.5" id="modal-p-price">₦24,500</p>
+        </div>
+      </div>
+
+      <p class="text-xs text-stone-600 leading-relaxed mb-4" id="modal-p-desc">
+        Crafted from breathable pastel cotton-linen with a modest crew neckline, below-the-knee hem, and comfortable full sleeves.
+      </p>
+
+      <!-- Modesty Checklist -->
+      <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-2xl mb-4 text-xs text-emerald-900 space-y-1">
+        <p class="font-bold flex items-center gap-1.5"><span>🛡️</span> Modesty Inspection:</p>
+        <div class="grid grid-cols-2 gap-1 text-[11px] text-emerald-800">
+          <span>✓ Neckline: High / Crew</span>
+          <span>✓ Hemline: Below the Knee</span>
+          <span>✓ Transparency: Fully Lined</span>
+          <span>✓ Sleeves: Long / Wrist Length</span>
+        </div>
+      </div>
+
+      <!-- Size Selector -->
+      <div class="mb-5">
+        <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Select Your Size (UK Standard)</label>
+        <div class="grid grid-cols-6 gap-2" id="modal-size-grid">
+          <button onclick="selectProductSize('UK 8')" class="size-pill p-2 rounded-xl border border-stone-200 text-xs font-bold text-stone-700 hover:border-rose-400">8</button>
+          <button onclick="selectProductSize('UK 10')" class="size-pill active p-2 rounded-xl border-2 border-rose-600 bg-rose-50 text-xs font-bold text-rose-900">10</button>
+          <button onclick="selectProductSize('UK 12')" class="size-pill p-2 rounded-xl border border-stone-200 text-xs font-bold text-stone-700 hover:border-rose-400">12</button>
+          <button onclick="selectProductSize('UK 14')" class="size-pill p-2 rounded-xl border border-stone-200 text-xs font-bold text-stone-700 hover:border-rose-400">14</button>
+          <button onclick="selectProductSize('UK 16')" class="size-pill p-2 rounded-xl border border-stone-200 text-xs font-bold text-stone-700 hover:border-rose-400">16</button>
+          <button onclick="selectProductSize('UK 18')" class="size-pill p-2 rounded-xl border border-stone-200 text-xs font-bold text-stone-700 hover:border-rose-400">18</button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="addModalProductToCart()" class="flex-1 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+          <span>Add to Shopping Cart</span>
+        </button>
+        <button onclick="tryModalProductOnAvatar()" class="px-4 py-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition">
+          Try on Avatar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================== -->
+  <!-- SLIDE-OUT SHOPPING CART DRAWER                       -->
+  <!-- ==================================================== -->
+  <div id="cart-drawer-backdrop" class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm hidden" onclick="toggleCartDrawer(false)"></div>
+  <aside id="cart-drawer" class="fixed top-0 right-0 z-50 w-full max-w-md h-full bg-white shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    
+    <!-- Drawer Header -->
+    <div class="p-5 border-b border-stone-200 flex items-center justify-between">
+      <div>
+        <h3 class="text-lg font-bold font-serif text-stone-900">Your Shopping Cart</h3>
+        <p class="text-xs text-stone-500"><span id="cart-items-total-count">0</span> items selected</p>
+      </div>
+      <button onclick="toggleCartDrawer(false)" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 font-bold">✕</button>
+    </div>
+
+    <!-- Cart Items Scroll List -->
+    <div class="flex-1 overflow-y-auto p-5 space-y-4" id="cart-items-list">
+      <!-- Populated via JavaScript -->
+    </div>
+
+    <!-- Drawer Footer / Checkout CTA -->
+    <div class="p-5 border-t border-stone-200 bg-stone-50 space-y-3">
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-stone-600 font-semibold">Subtotal:</span>
+        <span class="font-extrabold text-stone-900 text-base" id="cart-subtotal-price">₦0</span>
+      </div>
+      <button onclick="openCheckoutDemonstration()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+        <span>Proceed to Demonstration Checkout</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </button>
+      <p class="text-[11px] text-stone-400 text-center">Prototype mode: No real payment charged.</p>
+    </div>
+
+  </aside>
+
+  <!-- ==================================================== -->
+  <!-- MODAL: DEMONSTRATION CHECKOUT                        -->
+  <!-- ==================================================== -->
+  <div id="modal-checkout-demo" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 shadow-2xl border border-stone-100 text-left">
+      <div class="flex items-center justify-between pb-4 border-b border-stone-200">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-rose-600">Shopping Demonstration</span>
+          <h3 class="text-xl font-bold font-serif text-stone-900">Prototype Checkout Experience</h3>
+        </div>
+        <button onclick="closeCheckoutDemoModal()" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-500 font-bold">✕</button>
+      </div>
+
+      <form onsubmit="handleDemoOrderSubmit(event)" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">Delivery Address</label>
+          <input type="text" required value="Plot 12, Admiralty Way, Lekki Phase 1, Lagos" class="w-full px-3.5 py-2 rounded-xl border border-stone-200 text-xs font-semibold focus:ring-2 focus:ring-rose-500">
+        </div>
+
+        <div class="bg-amber-50 p-3.5 rounded-2xl border border-amber-200 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-amber-900">Apply Style Coins</p>
+            <p class="text-[11px] text-amber-700">Use 200 Coins for ₦2,000 instant voucher</p>
+          </div>
+          <input type="checkbox" id="chk-use-coins" onchange="toggleCheckoutCoins(this)" class="w-5 h-5 text-rose-600 rounded">
+        </div>
+
+        <div class="p-3.5 bg-stone-50 rounded-2xl border border-stone-200 space-y-1.5 text-xs">
+          <div class="flex justify-between text-stone-600">
+            <span>Items Subtotal:</span>
+            <span id="demo-checkout-subtotal">₦24,500</span>
+          </div>
+          <div class="flex justify-between text-stone-600">
+            <span>Doorstep Courier (Lagos):</span>
+            <span>₦2,000</span>
+          </div>
+          <div class="flex justify-between text-rose-600 font-bold" id="demo-coin-discount-row" style="display: none;">
+            <span>Coin Discount:</span>
+            <span>-₦2,000</span>
+          </div>
+          <div class="pt-2 border-t border-stone-200 flex justify-between font-extrabold text-stone-900 text-sm">
+            <span>Total Payable:</span>
+            <span id="demo-checkout-final-total">₦26,500</span>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-sm shadow hover:from-emerald-700 hover:to-teal-700 transition">
+          Simulate Payment (Paystack / Transfer)
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================================================== -->
+  <!-- MODAL: CHALLENGE SCORING & COINS AWARD              -->
+  <!-- ==================================================== -->
+  <div id="modal-challenge-scoring" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white max-w-md w-full rounded-3xl p-6 sm:p-8 shadow-2xl border border-rose-100 text-center">
+      <div class="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-3xl mx-auto mb-3">
+        🏆
+      </div>
+      <span class="text-xs font-bold uppercase tracking-wider text-rose-600">Challenge Judged</span>
+      <h3 class="text-2xl font-extrabold font-serif text-stone-900 mt-1">Stunning Modest Styling!</h3>
+      <p class="text-xs text-stone-500 mt-1" id="scoring-challenge-subtitle">Sunday Best: Pastel Grace</p>
+
+      <div class="my-5 p-4 bg-stone-50 rounded-2xl border border-stone-100 text-left space-y-2.5 text-xs">
+        <div class="flex justify-between font-semibold text-stone-700">
+          <span>Modesty & Grace:</span>
+          <span class="text-emerald-600 font-bold">98% (Exemplary)</span>
+        </div>
+        <div class="w-full bg-stone-200 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full w-[98%]"></div></div>
+
+        <div class="flex justify-between font-semibold text-stone-700">
+          <span>Theme Accordance:</span>
+          <span class="text-rose-600 font-bold">95%</span>
+        </div>
+        <div class="w-full bg-stone-200 rounded-full h-1.5"><div class="bg-rose-500 h-1.5 rounded-full w-[95%]"></div></div>
+
+        <div class="flex justify-between font-semibold text-stone-700">
+          <span>Creativity & Coordination:</span>
+          <span class="text-amber-600 font-bold">92%</span>
+        </div>
+        <div class="w-full bg-stone-200 rounded-full h-1.5"><div class="bg-amber-400 h-1.5 rounded-full w-[92%]"></div></div>
+      </div>
+
+      <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl mb-5">
+        <span class="text-[11px] font-bold text-amber-800 uppercase">You Earned</span>
+        <div class="text-2xl font-extrabold text-amber-700 flex items-center justify-center gap-1 mt-0.5">
+          <span>🪙 +100 Coins</span>
+        </div>
+        <p class="text-[11px] text-amber-700 mt-0.5">Coins added to your persistent balance!</p>
+      </div>
+
+      <button onclick="closeChallengeScoringModal()" class="w-full py-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs transition">
+        Awesome! Continue
+      </button>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT STATE ENGINE -->
+  <script>
+    // 1. DATA STATE WITH LOCALSTORAGE PERSISTENCE
+    const defaultState = {
+      user: {
+        name: 'Oreoluwa',
+        coins: 450,
+        rank: 'Level 1: Chic Stylist'
+      },
+      avatar: {
+        shape: 'hourglass',
+        skinColor: '#8D5524',
+        skinName: 'Rich Cocoa',
+        hair: 'braids',
+        shoeColor: '#b91c1c'
+      },
+      equipped: {
+        garmentId: 'lilac',
+        outerwear: false,
+        handbag: false
+      },
+      cart: [],
+      savedOutfits: [
+        {
+          id: 'outfit-default',
+          title: 'My First Sunday Best Creation',
+          garmentId: 'lilac',
+          garmentName: 'Lilac Grace Floral Midi Gown',
+          price: '₦24,500',
+          hasOuterwear: false,
+          hasBag: true,
+          date: 'Just now'
+        }
+      ]
+    };
+
+    // Load from LocalStorage if available
+    let appState = JSON.parse(localStorage.getItem('PLAY_DRESS_UP_STATE')) || defaultState;
+
+    function saveState() {
+      localStorage.setItem('PLAY_DRESS_UP_STATE', JSON.stringify(appState));
+      updateUIIndicators();
+    }
+
+    // 2. PRODUCT & GARMENT CATALOG
+    const productsCatalog = [
+      {
+        id: 'lilac',
+        title: 'Lilac Grace Floral Midi Gown',
+        category: 'sunday',
+        categoryName: 'Sunday Best',
+        price: 24500,
+        priceDisplay: '₦24,500',
+        icon: '🌸',
+        desc: 'Delicate floral pattern on premium cotton linen. High modest neckline with sweeping flared hemline.',
+        svgFill: '#c084fc',
+        svgNeck: '#9333ea',
+        svgD: 'M77 122 C75 145 74 180 66 250 C90 256 110 256 134 250 C126 180 125 145 123 122 Z'
+      },
+      {
+        id: 'emerald',
+        title: 'Emerald Silk Wrap Maxi Dress',
+        category: 'special',
+        categoryName: 'OWAMBE & Weddings',
+        price: 28000,
+        priceDisplay: '₦28,000',
+        icon: '🍃',
+        desc: 'Lustrous emerald green silk satin with full ankle coverage and an adjustable waist sash.',
+        svgFill: '#059669',
+        svgNeck: '#047857',
+        svgD: 'M76 122 C74 150 72 195 64 285 C90 292 110 292 136 285 C128 195 126 150 124 122 Z'
+      },
+      {
+        id: 'navy',
+        title: 'Navy Royalty Pleated Maxi',
+        category: 'corporate',
+        categoryName: 'Corporate Chic',
+        price: 31000,
+        priceDisplay: '₦31,000',
+        icon: '👑',
+        desc: 'Structured double-pleated front with modest buttoned collar. Ideal for the executive boardroom.',
+        svgFill: '#1e3a8a',
+        svgNeck: '#172554',
+        svgD: 'M76 122 C74 150 72 195 62 290 C90 296 110 296 138 290 C128 195 126 150 124 122 Z'
+      },
+      {
+        id: 'coral',
+        title: 'Coral Pleated Tiered Midi',
+        category: 'casual',
+        categoryName: 'Casual Chic',
+        price: 22500,
+        priceDisplay: '₦22,500',
+        icon: '🌺',
+        desc: 'Vibrant coral hue with tiered pleats and full bell sleeves for comfortable weekend outings.',
+        svgFill: '#fb7185',
+        svgNeck: '#e11d48',
+        svgD: 'M77 122 C75 145 74 180 68 255 C90 260 110 260 132 255 C126 180 125 145 123 122 Z'
+      },
+      {
+        id: 'ivory-blazer',
+        title: 'Ivory Structured Double Blazer',
+        category: 'corporate',
+        categoryName: 'Corporate Chic',
+        price: 34000,
+        priceDisplay: '₦34,000',
+        icon: '🧥',
+        desc: 'Premium tailored outerwear with gold crest buttons. Modest layering over any dress or trousers.',
+        isOuterwear: true
+      },
+      {
+        id: 'tan-tote',
+        title: 'Tan Leather Structured Handbag',
+        category: 'casual',
+        categoryName: 'Accessories',
+        price: 18500,
+        priceDisplay: '₦18,500',
+        icon: '👜',
+        desc: 'Classic structured tote handcrafted from pebbled vegan leather.',
+        isAccessory: true
+      }
+    ];
+
+    // 3. NAVIGATION ROUTING
+    function navigateTo(viewId) {
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+      const target = document.getElementById(viewId);
+      if (target) {
+        target.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Update Nav active styling
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.getAttribute('data-target') === viewId) {
+          btn.classList.add('text-rose-600', 'bg-rose-50');
+        } else {
+          btn.classList.remove('text-rose-600', 'bg-rose-50');
+        }
+      });
+
+      // Special initializations per view
+      if (viewId === 'view-studio') {
+        syncStudioAvatar();
+      } else if (viewId === 'view-profile') {
+        renderSavedOutfits();
+      }
+    }
+
+    // 4. AVATAR ENGINE CONTROLS
+    function setSkinColor(colorCode, name) {
+      appState.avatar.skinColor = colorCode;
+      appState.avatar.skinName = name;
+      applySkinToSVG(colorCode);
+
+      document.querySelectorAll('.skin-btn').forEach(btn => {
+        if (btn.getAttribute('title') === name) {
+          btn.classList.add('active', 'ring-rose-500', 'scale-110');
+          btn.classList.remove('ring-stone-200');
+        } else {
+          btn.classList.remove('active', 'ring-rose-500', 'scale-110');
+          btn.classList.add('ring-stone-200');
+        }
+      });
+
+      updateAvatarDesc();
+      saveState();
+      syncStudioAvatar();
+    }
+
+    function applySkinToSVG(color) {
+      document.querySelectorAll('.avatar-skin').forEach(el => el.setAttribute('fill', color));
+    }
+
+    function setBodyShape(shape) {
+      appState.avatar.shape = shape;
+      const paths = {
+        hourglass: "M78 120 C75 140 76 170 82 195 C84 205 88 225 100 225 C112 225 116 205 118 195 C124 170 125 140 122 120 Z",
+        curvy: "M78 120 C75 140 72 170 78 200 C80 215 82 230 100 230 C118 230 120 215 122 200 C128 170 125 140 122 120 Z",
+        slim: "M82 120 C81 140 82 170 85 195 C86 205 89 220 100 220 C111 220 114 205 115 195 C118 170 119 140 118 120 Z",
+        plus: "M72 120 C68 140 70 175 75 205 C78 218 84 235 100 235 C116 235 122 218 125 205 C130 175 132 140 128 120 Z",
+        athletic: "M75 120 C74 140 78 170 83 195 C85 205 88 222 100 222 C112 222 115 205 117 195 C122 170 126 140 125 120 Z"
+      };
+
+      document.getElementById('svg-torso')?.setAttribute('d', paths[shape] || paths.hourglass);
+
+      document.querySelectorAll('.body-btn').forEach(btn => {
+        if (btn.getAttribute('data-val') === shape) {
+          btn.classList.add('active', 'border-rose-500', 'bg-rose-50', 'text-rose-900');
+          btn.classList.remove('border-stone-200', 'text-stone-700');
+        } else {
+          btn.classList.remove('active', 'border-rose-500', 'bg-rose-50', 'text-rose-900');
+          btn.classList.add('border-stone-200', 'text-stone-700');
+        }
+      });
+
+      updateAvatarDesc();
+      saveState();
+      syncStudioAvatar();
+    }
+
+    function setHairstyle(style) {
+      appState.avatar.hair = style;
+      const hairPaths = {
+        braids: "M78 78 C76 48 124 48 122 78 C126 95 125 130 122 145 C118 145 115 130 115 110 C108 110 102 110 95 110 C85 110 82 130 78 145 C75 130 74 95 78 78 Z",
+        afro: "M70 70 C65 40 135 40 130 70 C138 90 130 105 124 105 C120 75 80 75 76 105 C70 105 62 90 70 70 Z",
+        bob: "M80 75 C78 50 122 50 120 75 C124 95 124 110 120 118 C116 118 114 90 100 90 C86 90 84 118 80 118 C76 110 76 95 80 75 Z",
+        hijab: "M74 70 C70 42 130 42 126 70 C132 100 130 140 124 148 C118 148 110 125 100 125 C90 125 82 148 76 148 C70 140 68 100 74 70 Z"
+      };
+
+      const color = (style === 'hijab') ? '#be185d' : '#1c1917';
+      const el = document.getElementById('svg-hair-path');
+      if (el) {
+        el.setAttribute('d', hairPaths[style] || hairPaths.braids);
+        el.setAttribute('fill', color);
+      }
+
+      document.querySelectorAll('.hair-btn').forEach(btn => {
+        if (btn.getAttribute('data-val') === style) {
+          btn.classList.add('active', 'border-rose-500', 'bg-rose-50', 'text-rose-900');
+          btn.classList.remove('border-stone-200', 'text-stone-700');
+        } else {
+          btn.classList.remove('active', 'border-rose-500', 'bg-rose-50', 'text-rose-900');
+          btn.classList.add('border-stone-200', 'text-stone-700');
+        }
+      });
+
+      updateAvatarDesc();
+      saveState();
+      syncStudioAvatar();
+    }
+
+    function updateAvatarDesc() {
+      const pill = document.getElementById('avatar-desc-pill');
+      if (pill) {
+        pill.innerText = `${appState.avatar.skinName} • ${capitalize(appState.avatar.shape)} • ${capitalize(appState.avatar.hair)}`;
+      }
+    }
+
+    function saveAvatarProfile() {
+      saveState();
+      showToast('Avatar preferences saved!', '💃🏽');
+      navigateTo('view-studio');
+    }
+
+    // 5. MIRROR AVATAR TO DRESSING STUDIO
+    function syncStudioAvatar() {
+      const sourceSvg = document.getElementById('main-avatar-svg');
+      const targetContainer = document.getElementById('studio-avatar-clone-target');
+      if (sourceSvg && targetContainer) {
+        targetContainer.innerHTML = sourceSvg.outerHTML;
+      }
+    }
+
+    // 6. DRESSING STUDIO - RACKS & OUTFIT SWITCHING
+    function switchStudioRack(category) {
+      document.querySelectorAll('.studio-tab').forEach(t => {
+        if (t.getAttribute('data-rack') === category) {
+          t.classList.add('bg-rose-600', 'text-white');
+          t.classList.remove('bg-white', 'text-stone-600');
+        } else {
+          t.classList.remove('bg-rose-600', 'text-white');
+          t.classList.add('bg-white', 'text-stone-600');
+        }
+      });
+
+      renderStudioRackItems(category);
+    }
+
+    function renderStudioRackItems(category) {
+      const container = document.getElementById('studio-rack-grid');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (category === 'dresses') {
+        const dresses = productsCatalog.filter(p => !p.isOuterwear && !p.isAccessory);
+        dresses.forEach(d => {
+          const isEquipped = appState.equipped.garmentId === d.id;
+          const card = document.createElement('div');
+          card.className = `p-3.5 bg-white rounded-2xl border ${isEquipped ? 'border-2 border-rose-500 shadow-md' : 'border-stone-200 hover:border-rose-300'} cursor-pointer transition flex flex-col justify-between`;
+          card.onclick = () => equipGarment(d.id);
+          card.innerHTML = `
+            <div>
+              <div class="w-full h-24 rounded-xl bg-rose-50/60 flex items-center justify-center text-4xl mb-2">${d.icon}</div>
+              <h4 class="text-xs font-bold text-stone-900 truncate">${d.title}</h4>
+              <p class="text-[11px] text-stone-500">${d.priceDisplay}</p>
+            </div>
+            <span class="inline-block mt-2 text-[10px] font-bold text-center py-1 rounded-lg ${isEquipped ? 'bg-rose-600 text-white' : 'bg-stone-100 text-stone-600'}">
+              ${isEquipped ? 'Equipped ✓' : 'Tap to Wear'}
+            </span>
+          `;
+          container.appendChild(card);
+        });
+      } else if (category === 'outerwear') {
+        const item = productsCatalog.find(p => p.id === 'ivory-blazer');
+        const isEquipped = appState.equipped.outerwear;
+        const card = document.createElement('div');
+        card.className = `p-3.5 bg-white rounded-2xl border ${isEquipped ? 'border-2 border-rose-500 shadow-md' : 'border-stone-200'} cursor-pointer transition`;
+        card.onclick = () => toggleOuterwear();
+        card.innerHTML = `
+          <div class="w-full h-24 rounded-xl bg-blue-50/60 flex items-center justify-center text-4xl mb-2">🧥</div>
+          <h4 class="text-xs font-bold text-stone-900">${item.title}</h4>
+          <p class="text-[11px] text-stone-500">${item.priceDisplay}</p>
+          <span class="inline-block mt-2 w-full text-[10px] font-bold text-center py-1 rounded-lg ${isEquipped ? 'bg-rose-600 text-white' : 'bg-stone-100 text-stone-600'}">
+            ${isEquipped ? 'Remove Blazer' : 'Equip Blazer'}
+          </span>
+        `;
+        container.appendChild(card);
+      } else if (category === 'shoes-accessories') {
+        const bag = productsCatalog.find(p => p.id === 'tan-tote');
+        const isEquipped = appState.equipped.handbag;
+        const card = document.createElement('div');
+        card.className = `p-3.5 bg-white rounded-2xl border ${isEquipped ? 'border-2 border-rose-500 shadow-md' : 'border-stone-200'} cursor-pointer transition`;
+        card.onclick = () => toggleBag();
+        card.innerHTML = `
+          <div class="w-full h-24 rounded-xl bg-amber-50/60 flex items-center justify-center text-4xl mb-2">👜</div>
+          <h4 class="text-xs font-bold text-stone-900">${bag.title}</h4>
+          <p class="text-[11px] text-stone-500">${bag.priceDisplay}</p>
+          <span class="inline-block mt-2 w-full text-[10px] font-bold text-center py-1 rounded-lg ${isEquipped ? 'bg-rose-600 text-white' : 'bg-stone-100 text-stone-600'}">
+            ${isEquipped ? 'Remove Bag' : 'Equip Bag'}
+          </span>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    function equipGarment(garmentId) {
+      appState.equipped.garmentId = garmentId;
+      const g = productsCatalog.find(p => p.id === garmentId);
+      if (!g) return;
+
+      const dressMain = document.getElementById('svg-dress-main');
+      const dressNeck = document.getElementById('svg-dress-neck');
+      if (dressMain && dressNeck) {
+        dressMain.setAttribute('fill', g.svgFill);
+        dressMain.setAttribute('d', g.svgD);
+        dressNeck.setAttribute('fill', g.svgNeck);
+      }
+
+      document.getElementById('studio-item-name').innerText = g.title;
+      document.getElementById('studio-item-price').innerText = `${g.priceDisplay} • Modest Approved`;
+
+      saveState();
+      syncStudioAvatar();
+      renderStudioRackItems('dresses');
+      showToast(`Equipped ${g.title}`, '👗');
+    }
+
+    function toggleOuterwear() {
+      appState.equipped.outerwear = !appState.equipped.outerwear;
+      const el = document.getElementById('svg-outerwear-group');
+      if (el) {
+        el.style.display = appState.equipped.outerwear ? 'block' : 'none';
+      }
+      saveState();
+      syncStudioAvatar();
+      renderStudioRackItems('outerwear');
+      showToast(appState.equipped.outerwear ? 'Blazer Added' : 'Blazer Removed', '🧥');
+    }
+
+    function toggleBag() {
+      appState.equipped.handbag = !appState.equipped.handbag;
+      const el = document.getElementById('svg-accessory-bag');
+      if (el) {
+        el.style.display = appState.equipped.handbag ? 'block' : 'none';
+      }
+      saveState();
+      syncStudioAvatar();
+      renderStudioRackItems('shoes-accessories');
+      showToast(appState.equipped.handbag ? 'Handbag Added' : 'Handbag Removed', '👜');
+    }
+
+    // 7. SAVE OUTFIT FEATURE (STEP 2 OF PROTOTYPE)
+    function openSaveOutfitPrompt() {
+      const g = productsCatalog.find(p => p.id === appState.equipped.garmentId) || productsCatalog[0];
+      const defaultName = `My ${g.title.split(' ')[0]} Look`;
+      const title = prompt("Name this outfit combination to save it in your wardrobe:", defaultName);
+      if (title && title.trim()) {
+        const newOutfit = {
+          id: 'outfit-' + Date.now(),
+          title: title.trim(),
+          garmentId: g.id,
+          garmentName: g.title,
+          price: g.priceDisplay,
+          hasOuterwear: appState.equipped.outerwear,
+          hasBag: appState.equipped.handbag,
+          date: new Date().toLocaleDateString()
+        };
+        appState.savedOutfits.unshift(newOutfit);
+        saveState();
+        showToast('Outfit saved to your Wardrobe Profile!', '💾');
+      }
+    }
+
+    function renderSavedOutfits() {
+      const container = document.getElementById('saved-outfits-grid');
+      const countEl = document.getElementById('nav-saved-count');
+      if (countEl) countEl.innerText = appState.savedOutfits.length;
+      if (!container) return;
+
+      container.innerHTML = '';
+      if (appState.savedOutfits.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-12 text-center bg-white rounded-3xl border border-stone-200">
+            <p class="text-3xl mb-2">👗</p>
+            <p class="font-bold text-stone-800">No saved outfits yet</p>
+            <p class="text-xs text-stone-500 mt-1">Open the Dressing Studio to style and save your first look!</p>
+          </div>
+        `;
+        return;
+      }
+
+      appState.savedOutfits.forEach(outfit => {
+        const card = document.createElement('div');
+        card.className = "bg-white p-5 rounded-3xl border border-stone-200 shadow-sm flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-bold text-rose-600 uppercase bg-rose-50 px-2 py-0.5 rounded-md">Saved Outfit</span>
+              <span class="text-[11px] text-stone-400">${outfit.date}</span>
+            </div>
+            <h4 class="font-bold text-stone-900 text-base">${outfit.title}</h4>
+            <p class="text-xs text-stone-600 mt-1">Base: ${outfit.garmentName}</p>
+            <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-semibold text-stone-500">
+              <span class="bg-stone-100 px-2 py-0.5 rounded">Dress: ${outfit.price}</span>
+              ${outfit.hasOuterwear ? '<span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">+ Blazer</span>' : ''}
+              ${outfit.hasBag ? '<span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded">+ Handbag</span>' : ''}
+            </div>
+          </div>
+          <div class="mt-5 pt-3 border-t border-stone-100 flex items-center gap-2">
+            <button onclick="reEquipSavedOutfit('${outfit.id}')" class="flex-1 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs transition">
+              Wear This Look
+            </button>
+            <button onclick="deleteSavedOutfit('${outfit.id}')" class="p-2 rounded-xl text-stone-400 hover:text-red-500 transition" title="Delete">
+              🗑️
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function reEquipSavedOutfit(outfitId) {
+      const outfit = appState.savedOutfits.find(o => o.id === outfitId);
+      if (!outfit) return;
+
+      equipGarment(outfit.garmentId);
+      appState.equipped.outerwear = outfit.hasOuterwear;
+      document.getElementById('svg-outerwear-group').style.display = outfit.hasOuterwear ? 'block' : 'none';
+
+      appState.equipped.handbag = outfit.hasBag;
+      document.getElementById('svg-accessory-bag').style.display = outfit.hasBag ? 'block' : 'none';
+
+      saveState();
+      syncStudioAvatar();
+      showToast(`Re-equipped "${outfit.title}"!`, '✨');
+      navigateTo('view-studio');
+    }
+
+    function deleteSavedOutfit(outfitId) {
+      if (confirm("Remove this saved outfit from your wardrobe?")) {
+        appState.savedOutfits = appState.savedOutfits.filter(o => o.id !== outfitId);
+        saveState();
+        renderSavedOutfits();
+        showToast('Outfit removed', '🗑️');
+      }
+    }
+
+    // 8. PRODUCT DISPLAY & CATALOG (STEP 3 OF PROTOTYPE)
+    let currentStoreFilter = 'all';
+
+    function filterStoreCategory(cat) {
+      currentStoreFilter = cat;
+      document.querySelectorAll('.store-filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-filter') === cat) {
+          btn.classList.add('bg-stone-900', 'text-white');
+          btn.classList.remove('bg-stone-100', 'text-stone-600');
+        } else {
+          btn.classList.remove('bg-stone-900', 'text-white');
+          btn.classList.add('bg-stone-100', 'text-stone-600');
+        }
+      });
+      renderStoreProducts();
+      if (document.getElementById('view-store').classList.contains('active') === false) {
+        navigateTo('view-store');
+      }
+    }
+
+    function renderStoreProducts() {
+      const grid = document.getElementById('store-products-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const filtered = (currentStoreFilter === 'all') 
+        ? productsCatalog 
+        : productsCatalog.filter(p => p.category === currentStoreFilter);
+
+      filtered.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between";
+        card.innerHTML = `
+          <div class="p-6 bg-stone-50 flex items-center justify-center text-6xl h-44 cursor-pointer" onclick="openProductModal('${p.id}')">
+            ${p.icon}
+          </div>
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <span class="text-[10px] font-bold text-rose-600 uppercase tracking-wider">${p.categoryName}</span>
+              <h3 class="font-bold text-stone-900 text-sm mt-0.5 line-clamp-1">${p.title}</h3>
+              <p class="text-xs text-stone-500 mt-1 line-clamp-2">${p.desc}</p>
+              <div class="mt-3 flex items-baseline gap-2">
+                <span class="text-base font-extrabold text-stone-900">${p.priceDisplay}</span>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-stone-100 flex items-center gap-2">
+              <button onclick="openProductModal('${p.id}')" class="flex-1 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs transition">
+                View & Size
+              </button>
+              ${!p.isOuterwear && !p.isAccessory ? `
+                <button onclick="equipGarment('${p.id}')" class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition" title="Try on Avatar">
+                  💃🏽
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // 9. PRODUCT MODAL & ADD TO CART (STEP 4 OF PROTOTYPE)
+    let selectedModalProduct = null;
+    let selectedSize = 'UK 10';
+
+    function openProductModal(productId) {
+      const p = productsCatalog.find(item => item.id === productId);
+      if (!p) return;
+      selectedModalProduct = p;
+
+      document.getElementById('modal-p-icon').innerText = p.icon;
+      document.getElementById('modal-p-category').innerText = p.categoryName;
+      document.getElementById('modal-p-title').innerText = p.title;
+      document.getElementById('modal-p-price').innerText = p.priceDisplay;
+      document.getElementById('modal-p-desc').innerText = p.desc;
+
+      document.getElementById('modal-product-details').style.display = 'flex';
+    }
+
+    function closeProductModal() {
+      document.getElementById('modal-product-details').style.display = 'none';
+    }
+
+    function selectProductSize(size) {
+      selectedSize = size;
+      document.querySelectorAll('.size-pill').forEach(btn => {
+        if (btn.innerText === size.replace('UK ', '')) {
+          btn.classList.add('active', 'border-2', 'border-rose-600', 'bg-rose-50', 'text-rose-900');
+          btn.classList.remove('border-stone-200', 'text-stone-700');
+        } else {
+          btn.classList.remove('active', 'border-2', 'border-rose-600', 'bg-rose-50', 'text-rose-900');
+          btn.classList.add('border-stone-200', 'text-stone-700');
+        }
+      });
+    }
+
+    function addModalProductToCart() {
+      if (!selectedModalProduct) return;
+      addToCart(selectedModalProduct, selectedSize);
+      closeProductModal();
+      toggleCartDrawer(true);
+    }
+
+    function tryModalProductOnAvatar() {
+      if (selectedModalProduct && !selectedModalProduct.isOuterwear && !selectedModalProduct.isAccessory) {
+        equipGarment(selectedModalProduct.id);
+        closeProductModal();
+        navigateTo('view-studio');
+      } else {
+        alert("This item can be added to cart directly!");
+      }
+    }
+
+    function quickAddCurrentToCart() {
+      const g = productsCatalog.find(p => p.id === appState.equipped.garmentId) || productsCatalog[0];
+      addToCart(g, 'UK 10');
+      toggleCartDrawer(true);
+    }
+
+    function addToCart(product, size) {
+      const existing = appState.cart.find(item => item.id === product.id && item.size === size);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        appState.cart.push({
+          id: product.id,
+          title: product.title,
+          price: product.price,
+          priceDisplay: product.priceDisplay,
+          icon: product.icon,
+          size: size,
+          quantity: 1
+        });
+      }
+      saveState();
+      renderCart();
+      showToast(`Added ${product.title} (${size}) to cart!`, '🛍️');
+    }
+
+    function toggleCartDrawer(open) {
+      const drawer = document.getElementById('cart-drawer');
+      const backdrop = document.getElementById('cart-drawer-backdrop');
+      if (open) {
+        backdrop.classList.remove('hidden');
+        drawer.classList.remove('translate-x-full');
+        renderCart();
+      } else {
+        drawer.classList.add('translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-items-list');
+      const badge = document.getElementById('cart-badge-count');
+      const totalCountEl = document.getElementById('cart-items-total-count');
+      const subtotalEl = document.getElementById('cart-subtotal-price');
+
+      const totalQuantity = appState.cart.reduce((sum, item) => sum + item.quantity, 0);
+      const subtotal = appState.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+      badge.innerText = totalQuantity;
+      totalCountEl.innerText = totalQuantity;
+      subtotalEl.innerText = '₦' + subtotal.toLocaleString();
+
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (appState.cart.length === 0) {
+        container.innerHTML = `
+          <div class="py-16 text-center text-stone-400">
+            <p class="text-4xl mb-2">🛍️</p>
+            <p class="font-bold text-stone-700">Your cart is empty</p>
+            <p class="text-xs mt-1">Explore our modest collections to add your first piece.</p>
+          </div>
+        `;
+        return;
+      }
+
+      appState.cart.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = "flex items-center gap-3 p-3 bg-stone-50 rounded-2xl border border-stone-200";
+        row.innerHTML = `
+          <div class="w-12 h-12 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-2xl">${item.icon}</div>
+          <div class="flex-1">
+            <h4 class="text-xs font-bold text-stone-900 truncate">${item.title}</h4>
+            <p class="text-[11px] text-stone-500">Size: ${item.size} • Qty: ${item.quantity}</p>
+            <p class="text-xs font-bold text-rose-600">${item.priceDisplay}</p>
+          </div>
+          <button onclick="removeFromCart(${index})" class="text-stone-400 hover:text-red-500 text-xs font-bold p-1">✕</button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function removeFromCart(index) {
+      appState.cart.splice(index, 1);
+      saveState();
+      renderCart();
+    }
+
+    // 10. DEMO CHECKOUT FLOW
+    function openCheckoutDemonstration() {
+      if (appState.cart.length === 0) {
+        alert("Please add at least one item to your cart first!");
+        return;
+      }
+      toggleCartDrawer(false);
+      const subtotal = appState.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      document.getElementById('demo-checkout-subtotal').innerText = '₦' + subtotal.toLocaleString();
+      document.getElementById('demo-checkout-final-total').innerText = '₦' + (subtotal + 2000).toLocaleString();
+      document.getElementById('chk-use-coins').checked = false;
+      document.getElementById('demo-coin-discount-row').style.display = 'none';
+
+      document.getElementById('modal-checkout-demo').style.display = 'flex';
+    }
+
+    function closeCheckoutDemoModal() {
+      document.getElementById('modal-checkout-demo').style.display = 'none';
+    }
+
+    function toggleCheckoutCoins(checkbox) {
+      const subtotal = appState.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const discountRow = document.getElementById('demo-coin-discount-row');
+      const finalTotal = document.getElementById('demo-checkout-final-total');
+
+      if (checkbox.checked) {
+        if (appState.user.coins < 200) {
+          alert("You need at least 200 coins to use this voucher!");
+          checkbox.checked = false;
+          return;
+        }
+        discountRow.style.display = 'flex';
+        finalTotal.innerText = '₦' + Math.max(0, (subtotal + 2000 - 2000)).toLocaleString();
+      } else {
+        discountRow.style.display = 'none';
+        finalTotal.innerText = '₦' + (subtotal + 2000).toLocaleString();
+      }
+    }
+
+    function handleDemoOrderSubmit(e) {
+      e.preventDefault();
+      const usedCoins = document.getElementById('chk-use-coins').checked;
+      if (usedCoins) {
+        appState.user.coins -= 200;
+      }
+
+      appState.cart = [];
+      saveState();
+      closeCheckoutDemoModal();
+      showToast('🎉 Demo Order Placed! Packing slip generated.', '📦');
+      navigateTo('view-home');
+    }
+
+    // 11. CHALLENGES & GAMIFICATION ENGINE (STEP 5 OF PROTOTYPE)
+    let activeChallengeTitle = 'Sunday Best: Pastel Grace';
+
+    function startChallengeFromArena(title, presetGarment) {
+      activeChallengeTitle = title;
+      if (presetGarment) equipGarment(presetGarment);
+      navigateTo('view-studio');
+      showToast(`Challenge "${title}" loaded! Style & submit.`, '🏆');
+    }
+
+    function submitStudioLookToChallenge() {
+      document.getElementById('scoring-challenge-subtitle').innerText = activeChallengeTitle;
+      document.getElementById('modal-challenge-scoring').style.display = 'flex';
+    }
+
+    function closeChallengeScoringModal() {
+      appState.user.coins += 100;
+      saveState();
+      document.getElementById('modal-challenge-scoring').style.display = 'none';
+      showToast('+100 Reward Coins added to balance!', '🪙');
+      navigateTo('view-profile');
+    }
+
+    // 12. UTILITY & TOAST
+    function showToast(msg, icon = '✨') {
+      const toast = document.getElementById('app-toast');
+      document.getElementById('toast-msg').innerText = msg;
+      document.getElementById('toast-icon').innerText = icon;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3000);
+    }
+
+    function updateUIIndicators() {
+      document.querySelectorAll('#user-coins, .profile-coin-display').forEach(el => {
+        el.innerText = appState.user.coins;
+      });
+      const badge = document.getElementById('cart-badge-count');
+      if (badge) {
+        const total = appState.cart.reduce((s, i) => s + i.quantity, 0);
+        badge.innerText = total;
+      }
+      const savedCount = document.getElementById('nav-saved-count');
+      if (savedCount) {
+        savedCount.innerText = appState.savedOutfits.length;
+      }
+    }
+
+    function capitalize(s) {
+      return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+    }
+
+    // INITIAL BOOTSTRAP
+    window.addEventListener('DOMContentLoaded', () => {
+      // Rehydrate state
+      setSkinColor(appState.avatar.skinColor, appState.avatar.skinName);
+      setBodyShape(appState.avatar.shape);
+      setHairstyle(appState.avatar.hair);
+      equipGarment(appState.equipped.garmentId);
+
+      if (appState.equipped.outerwear) toggleOuterwear();
+      if (appState.equipped.handbag) toggleBag();
+
+      renderStudioRackItems('dresses');
+      renderStoreProducts();
+      renderSavedOutfits();
+      updateUIIndicators();
+      syncStudioAvatar();
+    });
+  </script>
+
+</body>
+</html>
